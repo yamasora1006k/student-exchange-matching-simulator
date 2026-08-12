@@ -60,3 +60,22 @@ def test_multiple_experiments_reports_mean_and_population_std() -> None:
     assert set(raw["method"]) == {"random", "proposed"}
     assert "component_count_mean" in summary.columns
     assert "component_count_std" in summary.columns
+
+
+def test_student_and_grade_limits() -> None:
+    graph = generate_initial_graph(
+        NetworkParameters(student_count=200, grade_count=5, seed=3)
+    )
+    assert graph.number_of_nodes() == 200
+    assert {data["grade"] for _, data in graph.nodes(data=True)} == {1, 2, 3, 4, 5}
+
+    for invalid in (
+        NetworkParameters(student_count=201),
+        NetworkParameters(student_count=40, grade_count=6),
+    ):
+        try:
+            invalid.validate()
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("上限を超える設定は拒否される必要があります")

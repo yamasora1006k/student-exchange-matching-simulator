@@ -9,6 +9,8 @@ import streamlit as st
 
 from matching import weight_constants
 from simulation import (
+    MAX_GRADE_COUNT,
+    MAX_STUDENT_COUNT,
     PRESETS,
     ComparisonResult,
     NetworkParameters,
@@ -77,12 +79,36 @@ st.markdown(
 
 with st.sidebar:
     st.header("シミュレーション設定")
-    student_count = st.number_input("学生数", min_value=2, max_value=100, value=40, step=1)
-    grade_count = st.number_input(
-        "学年数", min_value=1, max_value=min(10, int(student_count)), value=min(4, int(student_count)), step=1
+    student_count = st.number_input(
+        "学生数",
+        min_value=2,
+        max_value=MAX_STUDENT_COUNT,
+        value=40,
+        step=1,
+        help="グラフの頂点数です。基本設定は40人、最大200人です。",
     )
-    groups_per_grade = st.number_input("友人グループ数（各学年）", min_value=1, max_value=10, value=2, step=1)
-    preset_name = st.selectbox("初期状態プリセット", list(PRESETS), index=1)
+    grade_count = st.number_input(
+        "学年数",
+        min_value=1,
+        max_value=min(MAX_GRADE_COUNT, int(student_count)),
+        value=min(4, int(student_count)),
+        step=1,
+        help="学生を分ける学年数です。基本設定は4学年、最大5学年です。",
+    )
+    groups_per_grade = st.number_input(
+        "友人グループ数（各学年）",
+        min_value=1,
+        max_value=10,
+        value=2,
+        step=1,
+        help="各学年の中を何個の友人グループへ分けるかを指定します。",
+    )
+    preset_name = st.selectbox(
+        "初期状態プリセット",
+        list(PRESETS),
+        index=1,
+        help="初期交流が学年・友人グループへどの程度偏っているかを選びます。",
+    )
 
     if st.session_state.get("last_preset") != preset_name:
         same_group, same_grade, different_grade = PRESETS[preset_name]
@@ -94,17 +120,73 @@ with st.sidebar:
         )
 
     same_group_probability = st.number_input(
-        "同学年・同じ友人グループ", min_value=0.0, max_value=1.0, step=0.01, key="probability_same_group"
+        "同学年・同じ友人グループ",
+        min_value=0.0,
+        max_value=1.0,
+        step=0.01,
+        key="probability_same_group",
+        help="同じ学年・同じ友人グループの2人が、初めから交流辺を持つ確率です。",
     )
     same_grade_probability = st.number_input(
-        "同学年・別友人グループ", min_value=0.0, max_value=1.0, step=0.01, key="probability_same_grade"
+        "同学年・別友人グループ",
+        min_value=0.0,
+        max_value=1.0,
+        step=0.01,
+        key="probability_same_grade",
+        help="同じ学年・別の友人グループの2人が、初めから交流辺を持つ確率です。",
     )
     different_grade_probability = st.number_input(
-        "異学年", min_value=0.0, max_value=1.0, step=0.01, key="probability_different_grade"
+        "異学年",
+        min_value=0.0,
+        max_value=1.0,
+        step=0.01,
+        key="probability_different_grade",
+        help="異なる学年の2人が、初めから交流辺を持つ確率です。",
     )
-    seed = st.number_input("乱数 seed", min_value=0, max_value=2_147_483_647, value=42, step=1)
-    rounds = st.number_input("交流ラウンド数", min_value=1, max_value=20, value=5, step=1)
-    experiment_count = st.number_input("複数回実験回数", min_value=1, max_value=200, value=30, step=1)
+
+    with st.expander("実験設定（通常は変更不要）"):
+        st.caption("迷った場合は seed=42、5ラウンド、30回実験のままで構いません。")
+        seed = st.number_input(
+            "乱数 seed（再現用）",
+            min_value=0,
+            max_value=2_147_483_647,
+            value=42,
+            step=1,
+            help="架空ネットワークとランダム方式を再現する番号です。同じ条件・seedなら同じ結果になります。",
+        )
+        rounds = st.number_input(
+            "交流ラウンド数",
+            min_value=1,
+            max_value=20,
+            value=5,
+            step=1,
+            help="マッチングを作り、新しい交流辺を追加する処理を繰り返す回数です。",
+        )
+        experiment_count = st.number_input(
+            "複数回実験回数",
+            min_value=1,
+            max_value=200,
+            value=30,
+            step=1,
+            help="seedを変えて比較を繰り返す回数です。多いほど偶然の影響を減らせますが、計算時間が長くなります。",
+        )
+
+    with st.expander("各パラメータの説明"):
+        st.markdown(
+            """
+- **学生数**：グラフの頂点数
+- **学年・友人グループ**：学生へ付ける架空の属性
+- **3つの確率**：初期状態で交流辺が存在する確率
+- **seed**：同じ乱数結果を再現するための番号
+- **交流ラウンド数**：新しいペア作成を繰り返す回数
+- **複数回実験回数**：seedを変えて平均・標準偏差を求める回数
+"""
+        )
+
+    if int(student_count) >= 100 and int(experiment_count) >= 30:
+        st.warning(
+            "学生数と実験回数が多いため、計算に数分以上かかる場合があります。まず実験回数を5～10回にすると確認しやすくなります。"
+        )
 
 parameters = NetworkParameters(
     student_count=int(student_count),

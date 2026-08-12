@@ -19,6 +19,9 @@ PRESETS: dict[str, tuple[float, float, float]] = {
     "分断が弱い": (0.50, 0.25, 0.15),
 }
 
+MAX_STUDENT_COUNT = 200
+MAX_GRADE_COUNT = 5
+
 
 @dataclass(frozen=True)
 class NetworkParameters:
@@ -31,10 +34,12 @@ class NetworkParameters:
     seed: int = 42
 
     def validate(self) -> None:
-        if self.student_count < 2:
-            raise ValueError("学生数は2人以上にしてください")
-        if not 1 <= self.grade_count <= self.student_count:
-            raise ValueError("学年数は1以上、学生数以下にしてください")
+        if not 2 <= self.student_count <= MAX_STUDENT_COUNT:
+            raise ValueError(f"学生数は2人以上{MAX_STUDENT_COUNT}人以下にしてください")
+        if not 1 <= self.grade_count <= min(MAX_GRADE_COUNT, self.student_count):
+            raise ValueError(
+                f"学年数は1以上、学生数以下かつ{MAX_GRADE_COUNT}学年以下にしてください"
+            )
         if self.groups_per_grade < 1:
             raise ValueError("各学年の友人グループ数は1以上にしてください")
         for probability in (
