@@ -129,7 +129,7 @@ for column, (label, value) in zip(metric_columns, initial_metrics.items()):
 preview_positions = graph_layout(preview_graph, int(seed))
 st.plotly_chart(
     graph_figure(preview_graph, "初期交流ネットワーク（頂点色 = 学年）", preview_positions),
-    use_container_width=True,
+    width="stretch",
 )
 
 constants = weight_constants(int(student_count))
@@ -145,7 +145,7 @@ st.warning(
     "異なる連結成分間のペア数を多くすることと、連結成分数の減少を最大化することは一致しません。"
 )
 
-if st.button("シミュレーションを実行", type="primary", use_container_width=True):
+if st.button("シミュレーションを実行", type="primary", width="stretch"):
     with st.spinner("単一比較と複数回実験を計算しています…"):
         initial_graph = generate_initial_graph(parameters)
         comparison = run_comparison(initial_graph, int(rounds), int(seed))
@@ -173,14 +173,14 @@ if output:
         st.caption("最大人数を組ませる制約のもと、seed付きランダム順位でペアを選びます。")
         st.plotly_chart(
             graph_figure(comparison.random.final_graph, "ランダム方式・最終グラフ", result_positions),
-            use_container_width=True,
+            width="stretch",
         )
     with proposed_column:
         st.subheader("方法B：最大重みマッチング")
         st.caption("異成分、同一成分内の遠距離、異学年の順に優先します。")
         st.plotly_chart(
             graph_figure(comparison.proposed.final_graph, "提案方式・最終グラフ", result_positions),
-            use_container_width=True,
+            width="stretch",
         )
 
     st.header("3. 指標比較")
@@ -193,7 +193,7 @@ if output:
                 "グローバル効率": "{:.4f}",
             }
         ),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -216,8 +216,8 @@ if output:
         labels={"round": "ラウンド", selected_metric: METRIC_LABELS[selected_metric]},
     )
     trend.update_layout(height=430, legend_title_text="")
-    st.plotly_chart(trend, use_container_width=True)
-    st.dataframe(round_metrics, use_container_width=True, hide_index=True)
+    st.plotly_chart(trend, width="stretch")
+    st.dataframe(round_metrics, width="stretch", hide_index=True)
 
     st.header("5. なぜこのペアが選ばれたか")
     proposed_details = comparison.proposed.matching_details
@@ -231,7 +231,7 @@ if output:
         detail_columns = ["student_a", "student_b", "C", "distance", "Y", "weight"]
         st.dataframe(
             proposed_details.loc[proposed_details["round"] == selected_round, detail_columns],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
         st.caption("C=1 は異なる連結成分、distance は同一成分内の最短経路長、Y=1 は異学年を表します。")
@@ -241,7 +241,7 @@ if output:
     st.caption(
         f"seed {result_parameters.seed} から順に変えた {len(output['raw_experiments']) // 2} 回の実験。標準偏差は母標準偏差（ddof=0）です。"
     )
-    st.dataframe(summary_for_display, use_container_width=True, hide_index=True)
+    st.dataframe(summary_for_display, width="stretch", hide_index=True)
 
     st.header("7. CSVダウンロード")
     all_matching = pd.concat(
@@ -253,21 +253,21 @@ if output:
         csv_bytes(round_metrics.drop(columns="方式")),
         "round_metrics.csv",
         "text/csv",
-        use_container_width=True,
+        width="stretch",
     )
     download_columns[1].download_button(
         "マッチング結果",
         csv_bytes(all_matching),
         "matching_results.csv",
         "text/csv",
-        use_container_width=True,
+        width="stretch",
     )
     download_columns[2].download_button(
         "複数回実験の集計",
         csv_bytes(output["experiment_summary"]),
         "experiment_summary.csv",
         "text/csv",
-        use_container_width=True,
+        width="stretch",
     )
 else:
     st.info("設定を確認し、「シミュレーションを実行」を押してください。")
