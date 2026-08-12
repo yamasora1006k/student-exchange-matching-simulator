@@ -2,7 +2,7 @@
 
 学校内の交流が学年や友人グループに偏る状況を、グラフ理論で単純化して比較する授業課題用Webアプリです。
 
-**公開デモ：** [http://ec2-43-207-123-160.ap-northeast-1.compute.amazonaws.com:8501](http://ec2-43-207-123-160.ap-northeast-1.compute.amazonaws.com:8501)
+**公開デモ：** [http://ec2-18-178-203-41.ap-northeast-1.compute.amazonaws.com:8501](http://ec2-18-178-203-41.ap-northeast-1.compute.amazonaws.com:8501)
 
 > Elastic IPを使わないMVPのため、EC2を停止・再作成した場合はURLが変わります。
 
