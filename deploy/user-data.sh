@@ -12,8 +12,9 @@ CONTAINER_NAME="graph-matching-simulator"
 echo "[1/7] Amazon Linux 2023を更新しています"
 dnf upgrade -y
 
-echo "[2/7] git、curl、Dockerをインストールしています"
-dnf install -y git curl docker
+echo "[2/7] gitとDockerをインストールしています"
+# Amazon Linux 2023にはcurl-minimalが標準搭載されているため、競合するcurlを追加しない。
+dnf install -y git docker
 
 echo "[3/7] 小さいインスタンスでのDocker build用にswapを用意しています"
 if ! swapon --show | grep -q /swapfile; then
